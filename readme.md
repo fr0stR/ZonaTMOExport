@@ -5,11 +5,11 @@ Este script de JavaScript permite exportar tus listas personales de manga (Leíd
 ## 🚀 Instrucciones paso a paso
 
 ### 1. Preparación
-* Abre tu navegador (Chrome, Edge o Firefox) y entra en [ZonaTMO](https://manganato.com/) (o tu dominio actual de TMO).
+* Abre tu navegador (Chrome, Edge o Firefox) y entra en [ZonaTMO(la nueva web de momento)](https://zonatmo.nakamasweb.com/) (o tu dominio actual de TMO).
 * **Inicia sesión** con tu cuenta.
 * Ve a tu perfil y selecciona la lista que quieras descargar (ejemplo: "Leídos").
 
-> **📷 DESCRIPCIÓN DE FOTO 1:** Una captura de pantalla de la sección "Mis Listas" en el perfil de ZonaTMO, resaltando con un círculo rojo la pestaña de "Leídos".
+![Paso 1 - Selección de lista](screenshots/proof1.PNG)
 
 ### 2. Abrir la Consola de Desarrollador
 * Una vez dentro de la lista, presiona la tecla **F12** en tu teclado (o `Ctrl + Shift + I`).
@@ -27,7 +27,7 @@ Este script de JavaScript permite exportar tus listas personales de manga (Leíd
 * **No cierres la pestaña** hasta que termine.
 * Al finalizar, se descargará automáticamente un archivo llamado `Backup_NombreDeTuLista.html`.
 
-> **📷 DESCRIPCIÓN DE FOTO 2:** Una captura de la consola del navegador mostrando los mensajes de éxito en color verde y la descarga del archivo apareciendo en la barra del navegador.
+![Paso 2 - Consola y descarga](screenshots/proof2.PNG)
 
 ---
 
