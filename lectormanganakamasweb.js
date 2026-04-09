@@ -2,55 +2,33 @@
     let allItems = [];
     let page = 1;
 
-    // Detectar la URL base según el elemento activo
-    const activeElements = document.querySelector(".element-header-bar .element-header-bar-element.active a");
-    const baseUrl = activeElements ? activeElements.href : "https://zonatmo.com/profile/read";
-    const seleccionTitulo = activeElements
-        ?.querySelector("small.element-header-bar-element-title")
-        ?.textContent.trim() || "Mi Lista de Manga";
+    const baseUrl = window.location.href.split('?')[0];
+    const seleccionTitulo = document.querySelector("h2.text-primary")?.textContent.trim() || "Mi Lista";
 
     console.log(`URL: ${baseUrl}`);
     console.log(`TITULO: ${seleccionTitulo}`);
 
-    // Obtener todos los elementos paginados
     while (true) {
         console.log(`Páginas: ${page}...`);
 
-        // Realizar la petición con la URL base
         const response = await fetch(`${baseUrl}?page=${page}`);
-        if (!response.ok) {
-            console.error("Error al cargar las páginas");
-            break;
-        }
+        if (!response.ok) break;
 
         const html = await response.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
 
-        // Seleccionar los ítems (nombre/link)
-        const items = [...doc.querySelectorAll(".element.proyect-item")];
+        const items = [...doc.querySelectorAll(".card")];
+
         if (items.length === 0) {
-            console.log("No hay más ítems que cargar.");
+            console.log("No hay más ítems.");
             break;
         }
 
-        // Extraer los títulos, enlaces e imágenes
         items.forEach(item => {
-            const title = item.querySelector(".thumbnail-title h4.text-truncate")?.getAttribute("title")?.trim() || "Sin título";
-            const link = item.querySelector("a")?.getAttribute("href")?.trim() || "#";
-            
-            const identifier = item.getAttribute("data-identifier");
-            
-            // Buscar el estilo CSS que contiene la imagen
-            const styleTag = item.querySelector("style");
-            let imageUrl = "Sin imagen";
-            
-            if (styleTag) {
-                const match = styleTag.textContent.match(/background-image:\s*url\(['"]?(.*?)['"]?\);/);
-                if (match) {
-                    imageUrl = match[1]; // Extrae la URL correcta de la imagen
-                }
-            }
+            const title = item.querySelector(".card-header a")?.getAttribute("title")?.trim() || "Sin título";
+            const link = item.querySelector(".card-body a")?.getAttribute("href")?.trim() || "#";
+            const imageUrl = item.querySelector(".card-body img")?.getAttribute("src") || "Sin imagen";
 
             allItems.push({ title, link, imageUrl });
         });
@@ -59,104 +37,45 @@
         page++;
     }
 
-    // Generar el contenido del HTML
-    console.log(`Generando archivo HTML para la lista: ${seleccionTitulo}`);
+    console.log(`Generando HTML...`);
 
     const htmlContent = `
-        <!DOCTYPE html>
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>${seleccionTitulo}</title>
-            <style>
-                body {
-                    background-color: #121212;
-                    color: #ffffff;
-                    font-family: Arial, sans-serif;
-                    text-align: center;
-                    margin: 0;
-                    padding: 0;
-                }
-                .topnav {
-                    background-color: #1e1e1e;
-                    padding: 15px;
-                    font-size: 20px;
-                    font-weight: bold;
-                }
-                .container {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    min-height: 90vh;
-                    flex-direction: column;
-                }
-                table {
-                    width: 80%;
-                    border-collapse: collapse;
-                    background-color: #222;
-                    border-radius: 10px;
-                    overflow: hidden;
-                }
-                th, td {
-                    padding: 15px;
-                    border: 1px solid #444;
-                    text-align: center;
-                }
-                th {
-                    background-color: #333;
-                    color: #fff;
-                }
-                a {
-                    color: #1e90ff;
-                    text-decoration: none;
-                    font-weight: bold;
-                }
-                a:hover {
-                    text-decoration: underline;
-                }
-                img {
-                    width: 60px;
-                    height: 80px;
-                    border-radius: 5px;
-                }
-            </style>
-        </head>
-        <body>
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>${seleccionTitulo}</title>
+        <style>
+            body { background:#121212; color:#fff; font-family:Arial; text-align:center; }
+            table { width:80%; margin:auto; border-collapse:collapse; background:#222; }
+            th, td { padding:10px; border:1px solid #444; }
+            img { width:60px; }
+            a { color:#1e90ff; }
+        </style>
+    </head>
+    <body>
+        <h1>${seleccionTitulo}</h1>
+        <table>
+            <tr><th>Imagen</th><th>Título</th></tr>
+            ${allItems.map(i => `
+                <tr>
+                    <td><img src="${i.imageUrl}"></td>
+                    <td><a href="${i.link}" target="_blank">${i.title}</a></td>
+                </tr>
+            `).join("")}
+        </table>
+    </body>
+    </html>`;
 
-            <div class="topnav">${seleccionTitulo}</div>
-            
-            <div class="container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Imagen</th>
-                            <th>Título</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${allItems.map(item => `
-                            <tr>
-                                <td><img src="${item.imageUrl}" alt="${item.title}"></td>
-                                <td><a href="${item.link}" target="_blank">${item.title}</a></td>
-                            </tr>
-                        `).join("")}
-                    </tbody>
-                </table>
-            </div>
-
-        </body>
-        </html>
-    `;
-
-    // Crear y descargar el archivo HTML
-    const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8;" });
+    const blob = new Blob([htmlContent], { type: "text/html" });
     const url = URL.createObjectURL(blob);
+
     const a = document.createElement("a");
     a.href = url;
-    a.download = `Lista de ${seleccionTitulo}.html`;
+    a.download = `${seleccionTitulo}.html`;
     a.click();
+
     URL.revokeObjectURL(url);
 
-    console.log("Archivo HTML exportado con éxito.");
+    console.log("Listo.");
 })();
